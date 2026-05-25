@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tela Login</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A1F44">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Login">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #0A1F44;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .login-box {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 250px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #0A1F44;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    /* Banner de instalação PWA */
+    #install-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border-radius: 12px;
+      padding: 12px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      text-align: center;
+      width: 260px;
+      font-size: 14px;
+      color: #0A1F44;
+      z-index: 999;
+    }
+
+    #install-banner p {
+      margin: 0 0 10px;
+      font-weight: bold;
+    }
+
+    #install-banner .banner-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    #install-banner button {
+      width: auto;
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    #btn-dismiss {
+      background: #ccc;
+      color: #333;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-box">
+    <h2>Login</h2>
+    <input type="email" placeholder="E-mail">
+    <input type="password" placeholder="Senha">
+    <button>Entrar</button>
+  </div>
+
+  <!-- Banner de instalação -->
+  <div id="install-banner">
+    <p>📲 Instalar o app?</p>
+    <div class="banner-buttons">
+      <button id="btn-install">Instalar</button>
+      <button id="btn-dismiss">Agora não</button>
+    </div>
+  </div>
+
+  <script>
+    // Registra o Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('SW registrado:', reg.scope))
+        .catch(err => console.error('Erro no SW:', err));
+    }
+
+    // Prompt de instalação PWA
+    let deferredPrompt;
+    const banner = document.getElementById('install-banner');
+    const btnInstall = document.getElementById('btn-install');
+    const btnDismiss = document.getElementById('btn-dismiss');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      banner.style.display = 'block';
+    });
+
+    btnInstall.addEventListener('click', async () => {
+      banner.style.display = 'none';
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log('Resultado:', outcome);
+      deferredPrompt = null;
+    });
+
+    btnDismiss.addEventListener('click', () => {
+      banner.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+      console.log('App instalado com sucesso!');
+      banner.style.display = 'none';
+    });
+  </script>
+
+</body>
+</html>

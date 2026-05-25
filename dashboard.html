@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Financeiro</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A1F44">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0A1F44;
+      --navy-light: #132d5e;
+      --accent: #4F8EF7;
+      --accent2: #00D4AA;
+      --red: #FF5A5A;
+      --bg: #F0F4FB;
+      --card: #ffffff;
+      --text: #0A1F44;
+      --muted: #8A9BB8;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 80px;
+      overflow-x: hidden;
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+      padding: 24px 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(79,142,247,0.15);
+      top: -60px; right: -40px;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(0,212,170,0.1);
+      bottom: 10px; left: -30px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .greeting { color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 300; }
+    .username { color: #fff; font-size: 20px; font-weight: 600; margin-top: 2px; }
+
+    .avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-weight: 600; font-size: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    /* SALDO CARD */
+    .balance-card {
+      background: linear-gradient(135deg, var(--accent) 0%, #2563cc 100%);
+      border-radius: 20px;
+      padding: 22px 24px;
+      margin: -36px 20px 0;
+      position: relative;
+      z-index: 2;
+      box-shadow: 0 12px 40px rgba(79,142,247,0.4);
+      animation: slideUp 0.5s ease both;
+    }
+
+    .balance-label { color: rgba(255,255,255,0.75); font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+    .balance-amount {
+      font-family: 'DM Mono', monospace;
+      color: #fff;
+      font-size: 32px;
+      font-weight: 500;
+      margin: 6px 0 16px;
+      letter-spacing: -1px;
+    }
+
+    .balance-row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .balance-mini {
+      flex: 1;
+      background: rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+
+    .balance-mini-label { color: rgba(255,255,255,0.7); font-size: 11px; }
+    .balance-mini-value { color: #fff; font-size: 15px; font-weight: 600; margin-top: 2px; font-family: 'DM Mono', monospace; }
+    .income { color: #7EFFD4 !important; }
+    .expense { color: #FFB3B3 !important; }
+
+    /* AÇÕES RÁPIDAS */
+    .section { padding: 24px 20px 0; }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+    .quick-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+
+    .action-btn {
+      flex: 1;
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(10,31,68,0.08);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .action-btn:active { transform: scale(0.95); }
+
+    .action-icon {
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+
+    .action-icon.blue { background: rgba(79,142,247,0.12); }
+    .action-icon.green { background: rgba(0,212,170,0.12); }
+    .action-icon.orange { background: rgba(255,180,50,0.12); }
+    .action-icon.red { background: rgba(255,90,90,0.12); }
+
+    .action-label { font-size: 11px; font-weight: 500; color: var(--text); }
+
+    /* CARDS DE RESUMO */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 2px 12px rgba(10,31,68,0.07);
+      animation: slideUp 0.5s ease both;
+    }
+
+    .card-icon { font-size: 22px; margin-bottom: 10px; }
+    .card-label { font-size: 11px; color: var(--muted); font-weight: 500; }
+    .card-value { font-size: 20px; font-weight: 600; margin-top: 4px; font-family: 'DM Mono', monospace; }
+    .card-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .card-sub.up { color: var(--accent2); }
+    .card-sub.down { color: var(--red); }
+
+    /* TRANSAÇÕES */
+    .transactions { display: flex; flex-direction: column; gap: 10px; }
+
+    .transaction {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 2px 8px rgba(10,31,68,0.06);
+    }
+
+    .tx-icon {
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .tx-info { flex: 1; }
+    .tx-name { font-size: 14px; font-weight: 500; }
+    .tx-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .tx-amount { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 600; }
+    .tx-amount.credit { color: var(--accent2); }
+    .tx-amount.debit { color: var(--red); }
+
+    /* NAVBAR */
+    .navbar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: white;
+      padding: 12px 20px 20px;
+      display: flex;
+      justify-content: space-around;
+      box-shadow: 0 -4px 20px rgba(10,31,68,0.1);
+      z-index: 10;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 16px;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+
+    .nav-item.active { background: rgba(79,142,247,0.1); }
+    .nav-icon { font-size: 22px; }
+    .nav-label { font-size: 10px; font-weight: 500; color: var(--muted); }
+    .nav-item.active .nav-label { color: var(--accent); }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section { animation: slideUp 0.5s ease both; }
+    .section:nth-child(2) { animation-delay: 0.1s; }
+    .section:nth-child(3) { animation-delay: 0.2s; }
+    .section:nth-child(4) { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="greeting">Bem-vindo de volta 👋</div>
+        <div class="username">Álvaro</div>
+      </div>
+      <div class="avatar">A</div>
+    </div>
+  </div>
+
+  <!-- SALDO -->
+  <div class="balance-card">
+    <div class="balance-label">Saldo total</div>
+    <div class="balance-amount">R$ 12.840,00</div>
+    <div class="balance-row">
+      <div class="balance-mini">
+        <div class="balance-mini-label">Receitas</div>
+        <div class="balance-mini-value income">+R$ 5.200</div>
+      </div>
+      <div class="balance-mini">
+        <div class="balance-mini-label">Despesas</div>
+        <div class="balance-mini-value expense">-R$ 1.360</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AÇÕES RÁPIDAS -->
+  <div class="section">
+    <div class="section-title">Ações rápidas</div>
+    <div class="quick-actions">
+      <button class="action-btn">
+        <div class="action-icon blue">💸</div>
+        <span class="action-label">Transferir</span>
+      </button>
+      <button class="action-btn">
+        <div class="action-icon green">💰</div>
+        <span class="action-label">Depositar</span>
+      </button>
+      <button class="action-btn">
+        <div class="action-icon orange">📄</div>
+        <span class="action-label">Pagar</span>
+      </button>
+      <button class="action-btn">
+        <div class="action-icon red">📊</div>
+        <span class="action-label">Relatório</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RESUMO -->
+  <div class="section">
+    <div class="section-title">Resumo do mês</div>
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🏦</div>
+        <div class="card-label">Investimentos</div>
+        <div class="card-value">R$ 4.500</div>
+        <div class="card-sub up">▲ 8,2% este mês</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💳</div>
+        <div class="card-label">Cartão crédito</div>
+        <div class="card-value">R$ 860</div>
+        <div class="card-sub down">▼ Fatura aberta</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <div class="card-label">Meta poupança</div>
+        <div class="card-value">68%</div>
+        <div class="card-sub up">▲ R$ 3.400 / 5.000</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📅</div>
+        <div class="card-label">Contas a pagar</div>
+        <div class="card-value">3</div>
+        <div class="card-sub down">▼ Vence em 5 dias</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSAÇÕES RECENTES -->
+  <div class="section">
+    <div class="section-title">Últimas transações</div>
+    <div class="transactions">
+      <div class="transaction">
+        <div class="tx-icon" style="background:#E8F5E9;">🛒</div>
+        <div class="tx-info">
+          <div class="tx-name">Supermercado</div>
+          <div class="tx-date">Hoje, 14:32</div>
+        </div>
+        <div class="tx-amount debit">-R$ 187,50</div>
+      </div>
+      <div class="transaction">
+        <div class="tx-icon" style="background:#E3F2FD;">💼</div>
+        <div class="tx-info">
+          <div class="tx-name">Salário</div>
+          <div class="tx-date">25 Mai, 08:00</div>
+        </div>
+        <div class="tx-amount credit">+R$ 5.200,00</div>
+      </div>
+      <div class="transaction">
+        <div class="tx-icon" style="background:#FFF3E0;">⚡</div>
+        <div class="tx-info">
+          <div class="tx-name">Conta de luz</div>
+          <div class="tx-date">24 Mai, 10:15</div>
+        </div>
+        <div class="tx-amount debit">-R$ 134,00</div>
+      </div>
+      <div class="transaction">
+        <div class="tx-icon" style="background:#F3E5F5;">🎬</div>
+        <div class="tx-info">
+          <div class="tx-name">Streaming</div>
+          <div class="tx-date">23 Mai, 00:00</div>
+        </div>
+        <div class="tx-amount debit">-R$ 39,90</div>
+      </div>
+    </div>
+  </div>
+
+  <br>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <button class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Início</span>
+    </button>
+    <button class="nav-item">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Relatórios</span>
+    </button>
+    <button class="nav-item">
+      <span class="nav-icon">💳</span>
+      <span class="nav-label">Cartões</span>
+    </button>
+    <button class="nav-item" onclick="window.location.href='index.html'">
+      <span class="nav-icon">🚪</span>
+      <span class="nav-label">Sair</span>
+    </button>
+  </nav>
+
+  <script>
+    // Navegação
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // Botão Entrar no login redireciona para dashboard
+    // Adiciona redirecionamento ao index.html
+  </script>
+
+</body>
+</html>

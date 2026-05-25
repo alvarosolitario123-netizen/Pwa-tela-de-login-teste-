@@ -106,7 +106,8 @@
     <h2>Login</h2>
     <input type="email" placeholder="E-mail">
     <input type="password" placeholder="Senha">
-    <button onclick="window.location.href='dashboard.html'">Entrar</button>
+    <button onclick="fazerLogin()">Entrar</button>
+<p id="erro" style="color:red;font-size:12px;margin-top:8px;display:none;">Preencha e-mail e senha!</p>
   </div>
 
   <!-- Banner de instalação -->
@@ -119,6 +120,34 @@
   </div>
 
   <script>
+    function fazerLogin() {
+      const email = document.querySelector('input[type="email"]').value.trim();
+      const senha = document.querySelector('input[type="password"]').value.trim();
+      const erro = document.getElementById('erro');
+
+      if (!email || !senha) {
+        erro.style.display = 'block';
+        return;
+      }
+
+      // Validação básica de e-mail
+      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailValido) {
+        erro.textContent = 'Digite um e-mail válido!';
+        erro.style.display = 'block';
+        return;
+      }
+
+      if (senha.length < 6) {
+        erro.textContent = 'A senha deve ter pelo menos 6 caracteres!';
+        erro.style.display = 'block';
+        return;
+      }
+
+      erro.style.display = 'none';
+      window.location.href = 'dashboard.html';
+    }
+
     // Registra o Service Worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
